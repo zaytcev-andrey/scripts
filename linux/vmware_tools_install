@@ -1,0 +1,35 @@
+#!/bin/bash
+
+sudo apt-get -y update
+#sudo apt-get -y upgrade #maybe it is not necessary
+
+sudo apt-get -y install linux-headers-$(uname -r)
+#exmple for headers sudo apt-get -y install linux-headers-server build-essential
+
+start_dir=$(pwd)
+
+mkdir tmp tmp_cdrom
+
+sudo mount /dev/cdrom tmp_cdrom
+
+cp -r tmp_cdrom/* tmp
+
+sudo umount tmp_cdrom
+
+sudo rm -r tmp_cdrom
+
+cd tmp
+
+tar -zxvf VM*.tar.gz
+
+cd vmware-tools-distrib
+
+sudo ./vmware-install.pl -d
+
+cd $start_dir
+
+sudo rm -r tmp
+
+#sudo reboot
+
+
