@@ -4,39 +4,49 @@
 
 GMP=gmp-4.3.2
 MPFR=mpfr-2.4.2
-MPC=mpc-0.8.1
-ISL=isl-0.12.2
-CLOOG=cloog-0.18.1
+MPC=mpc-1.0.1
 GCC_SRC=gcc-4.9.3
 GCC_BUILD_DIR=/usr/local/bin/gcc-4.9.3
 RES_LIB_DIR=/usr/lib
+HARDWARE_PLATFORM=`uname -i`
+
 
 #BUILD_OPT=--build=x86_64-linux-gnu
 BUILD_OPT=''
-
 
 #recreate temp directory
 TMPDIR=~/tmp
 if [ -d $TMPDIR ] 
 then 
-	echo 'yo! man! '$TMPDIR' is exists!'
+	echo 'yo! man! '$TMPDIR' is exists! recreate it'
 	rm -rf $TMPDIR
 fi
 mkdir $TMPDIR
 
+#cleanup all files
+cleanup() 
+{
+	echo 'claening up...'
+	echo "claenup `$TMPDIR`"
+	rm -rf $TMPDIR
+	echo 'claenup successfully'
+}
 
-#move distrib
-cp -v ~/Downloads/$GMP.tar.bz2 $TMPDIR
-cp -v ~/Downloads/$MPFR.tar.bz2 $TMPDIR
-cp -v ~/Downloads/$MPC.tar.gz $TMPDIR
-#mv -v ~/Downloads/$ISL.tar.bz2 $TMPDIR
-#mv -v ~/Downloads/$CLOOG.tar.gz $TMPDIR
-cp -v ~/Downloads/$GCC_SRC.tar.gz $TMPDIR
+#downloadin prerequisites
+
+echo "downloading ${GMP}..."
+wget -O $TMPDIR/$GMP.tar.bz2 ftp://mirrors.kernel.org/gnu/gmp/$GMP.tar.bz2
+echo "downloading ${MPFR}..."
+wget -O $TMPDIR/$MPFR.tar.bz2 ftp://mirrors.kernel.org/gnu/mpfr/$MPFR.tar.bz2
+echo "downloading ${MPC}..."
+wget -O $TMPDIR/$MPC.tar.gz ftp://mirrors.kernel.org/gnu/mpc/$MPC.tar.gz
+echo "downloading ${GCC_SRC}..."
+wget -O $TMPDIR/$GCC_SRC.tar.gz http://gcc.parentingamerica.com/releases/$GCC_SRC/$GCC_SRC.tar.gz
 
 # create $GCC_BUILD_DIR directory
 if [ -d $GCC_BUILD_DIR ] 
 then 
-	echo 'yo! man! '$GCC_BUILD_DIR' is exists!'
+	echo 'yo! man! '$GCC_BUILD_DIR' is exists! lets recreate it'
 	rm -rf $GCC_BUILD_DIR
 fi
 mkdir $GCC_BUILD_DIR
@@ -93,11 +103,22 @@ pushd $GCC_SRC
 mkdir build && pushd build
 ../configure --prefix=$GCC_BUILD_DIR $BUILD_OPT --with-gmp=$GCC_BUILD_DIR --with-mpfr=$GCC_BUILD_DIR
 
+# exporting path
 export LD_LIBRARY_PATH=$GCC_BUILD_DIR/lib:$LD_LIBRARY_PATH
 #export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/
 #export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
 #export CPLUS_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
-../configure $BUILD_OPT --prefix=$GCC_BUILD_DIR --with-gmp=$GCC_BUILD_DIR --with-mpfr=$GCC_BUILD_DIR --with-mpc=$GCC_BUILD_DIR --enable-checking=release --enable-languages=c,c++,fortran --disable-multilib --program-suffix=-4.9.3
+
+../configure \
+$BUILD_OPT \
+--prefix=$GCC_BUILD_DIR \
+--with-gmp=$GCC_BUILD_DIR \
+--with-mpfr=$GCC_BUILD_DIR \
+--with-mpc=$GCC_BUILD_DIR \
+--enable-checking=release \
+--enable-languages=c,c++,fortran,go \
+--disable-multilib \
+--program-suffix=-4.9.3
 make
 sudo make install
 	
@@ -116,3 +137,5 @@ done
 
 
 popd #pop $TMPDIR
+
+cleanup
