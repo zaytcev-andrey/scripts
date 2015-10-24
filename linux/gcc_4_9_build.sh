@@ -34,13 +34,13 @@ cleanup()
 
 #downloadin prerequisites
 
-echo "downloading ${GMP}..."
+echo "downloading $GMP..."
 wget -O $TMPDIR/$GMP.tar.bz2 ftp://mirrors.kernel.org/gnu/gmp/$GMP.tar.bz2
-echo "downloading ${MPFR}..."
+echo "downloading $MPFR..."
 wget -O $TMPDIR/$MPFR.tar.bz2 ftp://mirrors.kernel.org/gnu/mpfr/$MPFR.tar.bz2
-echo "downloading ${MPC}..."
+echo "downloading $MPC..."
 wget -O $TMPDIR/$MPC.tar.gz ftp://mirrors.kernel.org/gnu/mpc/$MPC.tar.gz
-echo "downloading ${GCC_SRC}..."
+echo "downloading $GCC_SRC..."
 wget -O $TMPDIR/$GCC_SRC.tar.gz http://gcc.parentingamerica.com/releases/$GCC_SRC/$GCC_SRC.tar.gz
 
 # create $GCC_BUILD_DIR directory
@@ -65,7 +65,6 @@ sudo make install
 	
 popd #pop build $GMP
 popd #pop $GMP
-
 
 #build $MPFR
 #unpack
@@ -101,7 +100,7 @@ tar -zxvf $GCC_SRC.tar.gz
 pushd $GCC_SRC
 
 mkdir build && pushd build
-../configure --prefix=$GCC_BUILD_DIR $BUILD_OPT --with-gmp=$GCC_BUILD_DIR --with-mpfr=$GCC_BUILD_DIR
+#../configure --prefix=$GCC_BUILD_DIR $BUILD_OPT --with-gmp=$GCC_BUILD_DIR --with-mpfr=$GCC_BUILD_DIR
 
 # exporting path
 export LD_LIBRARY_PATH=$GCC_BUILD_DIR/lib:$LD_LIBRARY_PATH
@@ -125,7 +124,7 @@ sudo make install
 popd #pop build $MPC
 popd #pop $MPC
 
-#add gcc-4.9 into PATH and create links for lib
+# add gcc-4.9 into PATH and create links for lib
 #export LD_LIBRARY_PATH=$GCC_BUILD_DIR/lib:$GCC_BUILD_DIR/lib64:$LD_LIBRARY_PATH
 echo export PATH=$GCC_BUILD_DIR/bin:$PATH >> ~/.bashrc
 for file in $(ls $GCC_BUILD_DIR/lib/*); do	
@@ -138,4 +137,4 @@ done
 
 popd #pop $TMPDIR
 
-cleanup
+#cleanup
