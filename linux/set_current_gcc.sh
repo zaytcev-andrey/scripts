@@ -19,11 +19,12 @@ then
 	then
 		echo "file with previous version of gcc exists."
 		
-		GCC_PREV_PATH=$(cat $GCC_PREV_VER_FILE)
+		GCC_PREV_PATH=$(cat $GCC_PREV_VER_FILE | head -n 1)
+		GPP_PREV_PATH=$(cat $GCC_PREV_VER_FILE | tail -n 1)
 
 		if [ ! -f $GCC_PREV_PATH ]
 		then
-			echo "path $GCC_PREV_PATH of previous gcc version does not exist"		
+			echo "path $GCC_PREV_PATH of previous gcc version does not exist"
 			exit 1
 		fi
 
@@ -32,6 +33,7 @@ then
 		echo "restoring $GCC_PREV_VER version of gcc..."
 		
 		sudo ln -sf $GCC_PREV_PATH /usr/bin/gcc
+		sudo ln -sf $GPP_PREV_PATH /usr/bin/g++
 		
 		PREV_GCC_VER_ASSERT=`/usr/bin/gcc --version | head -n 1 | cut -d ")" -f 2 | cut -b 2-6`
 		
@@ -58,8 +60,10 @@ else
 		exit 0
 	fi
 
-	CUR_GCC_PATH=`readlink -f /usr/bin/gcc`	
+	CUR_GCC_PATH=`readlink -f /usr/bin/gcc`
+	CUR_GPP_PATH=`readlink -f /usr/bin/g++`
 	NEW_GCC_PATH=`whereis gcc-$NEW_GCC_VER | cut -d " " -f2 -s`
+	NEW_GPP_PATH=`whereis g++-$NEW_GCC_VER | cut -d " " -f2 -s`
 
 	if [ "$NEW_GCC_PATH" = "" ]
 	then
@@ -81,13 +85,16 @@ else
 			exit 1
 		fi	
 
-		NEW_GCC_PATH=$NEW_GCC_PATH/bin/gcc-$NEW_GCC_VER
+		BASE_GCC_PATH=$NEW_GCC_PATH
+		NEW_GCC_PATH=$BASE_GCC_PATH/bin/gcc-$NEW_GCC_VER
+		NEW_GPP_PATH=$BASE_GCC_PATH/bin/g++-$NEW_GCC_VER
 		echo "find file $NEW_GCC_PATH"
 
 	fi
 
 	echo "setting up $NEW_GCC_VER as current version gcc"	
-	echo "current ver path = "$CUR_GCC_PATH " new ver path = "$NEW_GCC_PATH
+	echo "gcc current ver path = "$CUR_GCC_PATH " new ver path = "$NEW_GCC_PATH
+	echo "g++ current ver path = "$CUR_GPP_PATH " new ver path = "$NEW_GPP_PATH
 	
 	NEW_GCC_VER_ASSERT=`$NEW_GCC_PATH --version | head -n 1 | cut -d ")" -f 2 | cut -b 2-6`
 
@@ -99,7 +106,9 @@ else
 	fi
 	
 	echo $CUR_GCC_PATH > $GCC_PREV_VER_FILE
+	echo $CUR_GPP_PATH >> $GCC_PREV_VER_FILE
 	
 	sudo ln -sf $NEW_GCC_PATH /usr/bin/gcc
+	sudo ln -sf $NEW_GPP_PATH /usr/bin/g++
 	
 fi

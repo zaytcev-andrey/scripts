@@ -1,18 +1,32 @@
 #!/bin/bash
 
-#script for building gcc 4.9.3
+#script for building gcc any version (tested with 4.9.3 and over)
 
-GMP=gmp-4.3.2
-MPFR=mpfr-2.4.2
-MPC=mpc-1.0.1
-GCC_SRC=gcc-4.9.3
-GCC_BUILD_DIR=/usr/local/bin/gcc-4.9.3
+GCC_VER=$1
+GMP_VER=$2
+MPFR_VER=$3
+MPC_VER=$4
+
+GMP=gmp-$GMP_VER
+MPFR=mpfr-$MPFR_VER
+MPC=mpc-$MPC_VER
+GCC_SRC=gcc-$GCC_VER
+GCC_BUILD_DIR=/usr/local/bin/$GCC_SRC
 RES_LIB_DIR=/usr/lib
 HARDWARE_PLATFORM=`uname -i`
 
-
-#BUILD_OPT=--build=x86_64-linux-gnu
 BUILD_OPT=''
+OS_NAME=''
+
+echo "test ubuntu!"
+
+if [ "$(uname -a | grep Ubuntu)" != "" ]
+then 
+	echo "yo! man! its ubuntu!"
+	BUILD_OPT=--build=x86_64-linux-gnu
+	echo "build options is: $BUILD_OPT"
+	OS_NAME="Ubuntu"
+fi
 
 #recreate temp directory
 TMPDIR=~/tmp
@@ -53,8 +67,8 @@ mkdir $GCC_BUILD_DIR
 
 pushd $TMPDIR
 
-#build $GMP
-#unpack
+# build $GMP
+# unpack
 tar -jxvf $GMP.tar.bz2
 pushd $GMP
 
@@ -66,8 +80,8 @@ sudo make install
 popd #pop build $GMP
 popd #pop $GMP
 
-#build $MPFR
-#unpack
+# build $MPFR
+# unpack
 tar -jxvf $MPFR.tar.bz2
 pushd $MPFR
 
@@ -78,7 +92,6 @@ sudo make install
 	
 popd #pop build $MPFR
 popd #pop $MPFR
-
 
 #build $MPC
 #unpack
@@ -104,9 +117,13 @@ mkdir build && pushd build
 
 # exporting path
 export LD_LIBRARY_PATH=$GCC_BUILD_DIR/lib:$LD_LIBRARY_PATH
-#export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/
-#export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
-#export CPLUS_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+
+if [ $OS_NAME = "Ubuntu" ]
+then
+	export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/
+	export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+	export CPLUS_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+fi
 
 ../configure \
 $BUILD_OPT \
@@ -117,14 +134,14 @@ $BUILD_OPT \
 --enable-checking=release \
 --enable-languages=c,c++,fortran,go \
 --disable-multilib \
---program-suffix=-4.9.3
+--program-suffix=-$GCC_VER
 make
 sudo make install
 	
 popd #pop build $MPC
 popd #pop $MPC
 
-# add gcc-4.9 into PATH and create links for lib
+# add gcc-$GCC_VER into PATH and create links for lib
 #export LD_LIBRARY_PATH=$GCC_BUILD_DIR/lib:$GCC_BUILD_DIR/lib64:$LD_LIBRARY_PATH
 echo export PATH=$GCC_BUILD_DIR/bin:$PATH >> ~/.bashrc
 for file in $(ls $GCC_BUILD_DIR/lib/*); do	
@@ -137,4 +154,4 @@ done
 
 popd #pop $TMPDIR
 
-#cleanup
+cleanup
