@@ -4,6 +4,16 @@ INSTALL=0
 REMOVE=0
 FULL=0
 
+CURRENT_DIR=$(pwd)
+TMP_DIR=$CURRENT_DIR/emacs-installing-tmp
+EMACS_ARCH_NAME=emacs-25.1.tar.gz
+EMACS_SRC_DIR=`echo "$EMACS_ARCH_NAME" | cut -d '.' -f1-2`
+EMACS_BIN=/usr/local/bin/emacs
+EMACS_SHARE_DIR=/usr/local/share/emacs
+EMACS_LIBEXEC_DIR=/usr/local/libexec/emacs
+EMACS_INFO_MASK=/usr/local/share/info/emacs*
+EMACS_MAN_MASK=/usr/local/share/man/man1/emacs*
+
 function show_help()
 {
 	echo "usage: emacs-install.sh [install|reinstall|remove][full]"
@@ -55,6 +65,18 @@ function remove_by_path()
 	echo "removed $1"
 }
 
+function remove_components()
+{
+	echo "remove components"
+}
+
+function install_components()
+{
+	pushd $TMP_DIR
+	
+	popd
+}
+
 # parse command line
 case $# in
 1)
@@ -69,16 +91,6 @@ case $# in
 	exit 1
 	;;
 esac
-
-CURRENT_DIR=$(pwd)
-TMP_DIR=$CURRENT_DIR/emacs-installing-tmp
-EMACS_ARCH_NAME=emacs-25.1.tar.gz
-EMACS_SRC_DIR=`echo "$EMACS_ARCH_NAME" | cut -d '.' -f1-2`
-EMACS_BIN=/usr/local/bin/emacs
-EMACS_SHARE_DIR=/usr/local/share/emacs
-EMACS_LIBEXEC_DIR=/usr/local/libexec/emacs
-EMACS_INFO_MASK=/usr/local/share/info/emacs*
-EMACS_MAN_MASK=/usr/local/share/man/man1/emacs*
 
 # removing
 if [ $REMOVE = 1 ]
@@ -100,6 +112,12 @@ then
 
 	echo "removing emacs files by path $EMACS_MAN_MASK"
 	remove_by_path $EMACS_MAN_MASK
+
+	if [ $FULL = 1 ]
+	then
+		echo "removing components ..."
+		remove_components
+	fi
 fi
 
 # installing
@@ -167,6 +185,12 @@ then
 		popd
 
 	popd
+
+	if [ $FULL = 1 ]
+	then
+		echo "installing components ..."
+		install_components
+	fi	
 
 	if [ -d $TMP_DIR ]
 	then
